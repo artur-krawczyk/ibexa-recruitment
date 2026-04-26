@@ -12,3 +12,7 @@ class InvalidMoneyError(Exception):
 
 class InvalidPercentageError(Exception):
     pass
+
+
+class InvalidCartItemError(Exception):
+    pass
