@@ -1,0 +1,110 @@
+import pytest
+
+from discount_calculator.cart_item import CartItem
+from discount_calculator.discounts import Discount, FixedDiscount, PercentageDiscount, VolumeDiscount
+from discount_calculator.exceptions import CurrencyMismatchError
+from discount_calculator.money import Money
+from discount_calculator.percentage import Percentage
+
+
+def make_item(
+    code: str = "A",
+    amount: int = 10_00,
+    currency: str = "EUR",
+    quantity: int = 1,
+) -> CartItem:
+    return CartItem(code=code, price=Money(amount, currency), quantity=quantity)
+
+
+def test_discount_cannot_be_instantiated_directly():
+    with pytest.raises(TypeError):
+        Discount(product_codes=None)  # type: ignore[abstract]
+
+
+@pytest.mark.parametrize("product_codes,item_code,expected", [
+    (None, "XYZ", True),
+    (frozenset({"A"}), "A", True),
+    (frozenset({"A"}), "B", False),
+])
+def test_fixed_discount_applies_to(product_codes, item_code, expected):
+    discount = FixedDiscount(product_codes=product_codes, amount_per_unit=Money(1_00, "EUR"))
+    assert discount.applies_to(make_item(item_code)) is expected
+
+
+def test_fixed_discount_calculate_returns_amount_per_unit_times_quantity():
+    item = make_item(amount=10_00, quantity=3)
+    discount = FixedDiscount(product_codes=None, amount_per_unit=Money(2_00, "EUR"))
+    assert discount.calculate(item) == Money(6_00, "EUR")
+
+
+def test_fixed_discount_calculate_capped_at_line_total():
+    item = make_item(amount=1_00, quantity=2)  # line_total = 2_00
+    discount = FixedDiscount(product_codes=None, amount_per_unit=Money(2_00, "EUR"))  # raw = 4_00
+    assert discount.calculate(item) == Money(2_00, "EUR")
+
+
+def test_fixed_discount_calculate_raises_on_currency_mismatch():
+    item = make_item(currency="EUR")
+    discount = FixedDiscount(product_codes=None, amount_per_unit=Money(1_00, "USD"))
+    with pytest.raises(CurrencyMismatchError):
+        discount.calculate(item)
+
+
+@pytest.mark.parametrize("product_codes,item_code,expected", [
+    (None, "XYZ", True),
+    (frozenset({"B"}), "B", True),
+    (frozenset({"B"}), "A", False),
+])
+def test_percentage_discount_applies_to(product_codes, item_code, expected):
+    discount = PercentageDiscount(product_codes=product_codes, percentage=Percentage(10_00))
+    assert discount.applies_to(make_item(item_code)) is expected
+
+
+def test_percentage_discount_calculate_returns_percentage_of_line_total():
+    item = make_item(amount=10_00, quantity=2)  # line_total = 20_00
+    discount = PercentageDiscount(product_codes=None, percentage=Percentage(10_00))  # 10%
+    assert discount.calculate(item) == Money(2_00, "EUR")
+
+
+def test_percentage_discount_calculate_rounds_half_up():
+    # line_total = 3 cents, 50% → 1.5 → ROUND_HALF_UP → 2
+    item = make_item(amount=3, quantity=1)
+    discount = PercentageDiscount(product_codes=None, percentage=Percentage(50_00))
+    assert discount.calculate(item) == Money(2, "EUR")
+
+
+def test_percentage_discount_calculate_full_discount_equals_line_total():
+    item = make_item(amount=1_00, quantity=1)
+    discount = PercentageDiscount(product_codes=None, percentage=Percentage(100_00))  # 100%
+    assert discount.calculate(item) == Money(1_00, "EUR")
+
+
+@pytest.mark.parametrize("product_codes,item_code,quantity,expected", [
+    (None, "A", 3, True),
+    (None, "A", 5, True),
+    (None, "A", 2, False),
+    (frozenset({"X"}), "Y", 5, False),
+    (frozenset({"X"}), "X", 3, True),
+])
+def test_volume_discount_applies_to(product_codes, item_code, quantity, expected):
+    discount = VolumeDiscount(product_codes=product_codes, amount=Money(5_00, "EUR"), min_quantity=3)
+    assert discount.applies_to(make_item(code=item_code, quantity=quantity)) is expected
+
+
+def test_volume_discount_calculate_returns_flat_amount():
+    item = make_item(amount=10_00, quantity=3)  # line_total = 30_00
+    discount = VolumeDiscount(product_codes=None, amount=Money(5_00, "EUR"), min_quantity=3)
+    assert discount.calculate(item) == Money(5_00, "EUR")
+
+
+def test_volume_discount_calculate_capped_at_line_total():
+    item = make_item(amount=1_00, quantity=2)  # line_total = 2_00
+    discount = VolumeDiscount(product_codes=None, amount=Money(50_00, "EUR"), min_quantity=2)
+    assert discount.calculate(item) == Money(2_00, "EUR")
+
+
+def test_volume_discount_calculate_raises_on_currency_mismatch():
+    item = make_item(currency="EUR", quantity=3)
+    discount = VolumeDiscount(product_codes=None, amount=Money(5_00, "USD"), min_quantity=3)
+    with pytest.raises(CurrencyMismatchError):
+        discount.calculate(item)
