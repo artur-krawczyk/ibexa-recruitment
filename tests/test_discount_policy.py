@@ -4,7 +4,7 @@ import pytest
 
 from discount_calculator.cart_item import CartItem
 from discount_calculator.discount_policy import BestDiscountPolicy
-from discount_calculator.discounts import FixedDiscount, PercentageDiscount, VolumeDiscount
+from discount_calculator.discounts import Discount, FixedDiscount, PercentageDiscount, VolumeDiscount
 from discount_calculator.money import Money
 from discount_calculator.percentage import Percentage
 
@@ -146,6 +146,6 @@ _SCENARIOS = [
 
 
 @pytest.mark.parametrize("item,discounts,expected_saving", _SCENARIOS)
-def test_calculate_returns_best_saving(item, discounts, expected_saving):
+def test_calculate_returns_best_saving(item: CartItem, discounts: list[Discount], expected_saving: Money) -> None:
     policy = BestDiscountPolicy()
     assert policy.calculate(discounts, item) == expected_saving

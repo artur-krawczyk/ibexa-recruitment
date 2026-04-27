@@ -4,7 +4,7 @@ import pytest
 
 from discount_calculator.cart_item import CartItem
 from discount_calculator.discounts import Discount, FixedDiscount, PercentageDiscount, VolumeDiscount
-from discount_calculator.exceptions import CurrencyMismatchError
+from discount_calculator.exceptions import CurrencyMismatchError, InvalidDiscountError
 from discount_calculator.money import Money
 from discount_calculator.percentage import Percentage
 
@@ -144,3 +144,15 @@ def test_volume_discount_calculate_raises_on_currency_mismatch(
     discount = VolumeDiscount(restricted_to=None, amount=Money(5_00, "USD"), min_quantity=3)
     with pytest.raises(CurrencyMismatchError):
         discount.calculate(item)
+
+
+@pytest.mark.parametrize("min_quantity", [0, -1, -10])
+def test_volume_discount_raises_on_non_positive_min_quantity(min_quantity: int) -> None:
+    with pytest.raises(InvalidDiscountError):
+        VolumeDiscount(restricted_to=None, amount=Money(5_00, "EUR"), min_quantity=min_quantity)
+
+
+@pytest.mark.parametrize("min_quantity", [True, False])
+def test_volume_discount_raises_on_bool_min_quantity(min_quantity: bool) -> None:
+    with pytest.raises(InvalidDiscountError):
+        VolumeDiscount(restricted_to=None, amount=Money(5_00, "EUR"), min_quantity=min_quantity)  # type: ignore[arg-type]

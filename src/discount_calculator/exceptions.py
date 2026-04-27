@@ -16,3 +16,7 @@ class InvalidPercentageError(Exception):
 
 class InvalidCartItemError(Exception):
     pass
+
+
+class InvalidDiscountError(Exception):
+    pass

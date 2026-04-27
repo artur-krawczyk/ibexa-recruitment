@@ -1,9 +1,8 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from discount_calculator.cart_item import CartItem
+from discount_calculator.exceptions import InvalidDiscountError
 from discount_calculator.money import Money
 from discount_calculator.percentage import Percentage
 
@@ -42,6 +41,12 @@ class VolumeDiscount(Discount):
     restricted_to: frozenset[str] | None
     amount: Money
     min_quantity: int
+
+    def __post_init__(self) -> None:
+        if isinstance(self.min_quantity, bool) or not isinstance(self.min_quantity, int):
+            raise InvalidDiscountError(f"min_quantity must be an int, got {type(self.min_quantity).__name__}")
+        if self.min_quantity <= 0:
+            raise InvalidDiscountError(f"min_quantity must be positive, got {self.min_quantity}")
 
     def applies_to(self, item: CartItem) -> bool:
         return super().applies_to(item) and item.quantity >= self.min_quantity

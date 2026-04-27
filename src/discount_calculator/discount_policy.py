@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
 
 from discount_calculator.cart_item import CartItem
@@ -14,11 +12,11 @@ class DiscountPolicy(ABC):
 
 class BestDiscountPolicy(DiscountPolicy):
     def calculate(self, discounts: list[Discount], item: CartItem) -> Money:
-        best_saving = 0
+        best_saving = Money(0, item.price.currency)
         for discount in discounts:
             if not discount.applies_to(item):
                 continue
-            saving = discount.calculate(item).amount
-            if saving > best_saving:
+            saving = discount.calculate(item)
+            if best_saving < saving:
                 best_saving = saving
-        return Money(best_saving, item.price.currency)
+        return best_saving

@@ -6,6 +6,7 @@ from discount_calculator.exceptions import (
     CurrencyMismatchError,
     EmptyCartError,
     InvalidCartItemError,
+    InvalidDiscountError,
     InvalidMoneyError,
     InvalidPercentageError,
 )
@@ -22,6 +23,7 @@ __all__ = [
     "EmptyCartError",
     "FixedDiscount",
     "InvalidCartItemError",
+    "InvalidDiscountError",
     "InvalidMoneyError",
     "InvalidPercentageError",
     "Money",

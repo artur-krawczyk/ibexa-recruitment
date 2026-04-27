@@ -210,6 +210,6 @@ _SCENARIOS = [
 
 
 @pytest.mark.parametrize("items,discounts,expected", _SCENARIOS)
-def test_calculate_total(items, discounts, expected):
+def test_calculate_total(items: list[CartItem], discounts: list[Discount], expected: Money) -> None:
     calc = DiscountCalculator(discounts=discounts, policy=BestDiscountPolicy())
     assert calc.calculate_total(items) == expected

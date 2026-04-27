@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from discount_calculator.cart_item import CartItem
 from discount_calculator.discount_policy import DiscountPolicy
 from discount_calculator.discounts import Discount

@@ -32,3 +32,9 @@ def test_line_total_is_price_times_quantity() -> None:
 def test_cart_item_raises_on_empty_code() -> None:
     with pytest.raises(InvalidCartItemError):
         CartItem("", Money(100, "EUR"), 1)
+
+
+@pytest.mark.parametrize("quantity", [True, False])
+def test_cart_item_raises_on_bool_quantity(quantity: bool) -> None:
+    with pytest.raises(InvalidCartItemError):
+        CartItem("SKU-1", Money(100, "EUR"), quantity)  # type: ignore[arg-type]
