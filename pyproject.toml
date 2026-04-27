@@ -12,10 +12,26 @@ package-mode = true
 packages = [{ include = "discount_calculator", from = "src" }]
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.3"
+pytest = "^9.0"
+ruff = "^0.15.12"
+mypy = "^1.20.2"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+mypy_path = "src"
+packages = ["discount_calculator"]
+
+[tool.ruff]
+src = ["src"]
+line-length = 119
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = []
 
 [build-system]
 requires = ["poetry-core>=2.0.0"]

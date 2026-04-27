@@ -26,9 +26,7 @@ class FixedDiscount(Discount):
 
     def calculate(self, item: CartItem) -> Money:
         if item.price.currency != self.amount_per_unit.currency:
-            raise CurrencyMismatchError(
-                f"cannot mix {item.price.currency} and {self.amount_per_unit.currency}"
-            )
+            raise CurrencyMismatchError(f"cannot mix {item.price.currency} and {self.amount_per_unit.currency}")
         raw = self.amount_per_unit * item.quantity
         line_total = item.line_total()
         return Money(min(raw.amount, line_total.amount), line_total.currency)
@@ -54,8 +52,6 @@ class VolumeDiscount(Discount):
 
     def calculate(self, item: CartItem) -> Money:
         if item.price.currency != self.amount.currency:
-            raise CurrencyMismatchError(
-                f"cannot mix {item.price.currency} and {self.amount.currency}"
-            )
+            raise CurrencyMismatchError(f"cannot mix {item.price.currency} and {self.amount.currency}")
         line_total = item.line_total()
         return Money(min(self.amount.amount, line_total.amount), line_total.currency)

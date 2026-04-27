@@ -33,6 +33,4 @@ class Money:
 
     def _assert_same_currency(self, other: Money) -> None:
         if self.currency != other.currency:
-            raise CurrencyMismatchError(
-                f"cannot mix {self.currency} and {other.currency}"
-            )
+            raise CurrencyMismatchError(f"cannot mix {self.currency} and {other.currency}")

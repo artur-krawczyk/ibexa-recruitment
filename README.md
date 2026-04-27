@@ -10,8 +10,14 @@ Applies fixed, percentage, and volume discounts to a shopping cart and returns t
 ## Getting started
 
 ```bash
-poetry install
-poetry run pytest
+make install        # install all dependencies
+make check          # format-check + lint-check + types + test (full CI gate)
+make format-fix     # ruff format — auto-reformat code
+make format-check   # ruff format --check — verify formatting without changing files
+make lint-fix       # ruff check --fix — lint and auto-apply safe fixes
+make lint-check     # ruff check — style, imports, bugbear
+make types          # mypy — strict type checking
+make test           # pytest
 ```
 
 ## Usage

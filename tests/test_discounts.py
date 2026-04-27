@@ -21,11 +21,14 @@ def test_discount_cannot_be_instantiated_directly():
         Discount(restricted_to=None)  # type: ignore[abstract]
 
 
-@pytest.mark.parametrize("restricted_to,item_code,expected", [
-    (None, "XYZ", True),
-    (frozenset({"A"}), "A", True),
-    (frozenset({"A"}), "B", False),
-])
+@pytest.mark.parametrize(
+    "restricted_to,item_code,expected",
+    [
+        (None, "XYZ", True),
+        (frozenset({"A"}), "A", True),
+        (frozenset({"A"}), "B", False),
+    ],
+)
 def test_fixed_discount_applies_to(restricted_to, item_code, expected):
     discount = FixedDiscount(restricted_to=restricted_to, amount_per_unit=Money(1_00, "EUR"))
     assert discount.applies_to(make_item(item_code)) is expected
@@ -50,11 +53,14 @@ def test_fixed_discount_calculate_raises_on_currency_mismatch():
         discount.calculate(item)
 
 
-@pytest.mark.parametrize("restricted_to,item_code,expected", [
-    (None, "XYZ", True),
-    (frozenset({"B"}), "B", True),
-    (frozenset({"B"}), "A", False),
-])
+@pytest.mark.parametrize(
+    "restricted_to,item_code,expected",
+    [
+        (None, "XYZ", True),
+        (frozenset({"B"}), "B", True),
+        (frozenset({"B"}), "A", False),
+    ],
+)
 def test_percentage_discount_applies_to(restricted_to, item_code, expected):
     discount = PercentageDiscount(restricted_to=restricted_to, percentage=Percentage(10_00))
     assert discount.applies_to(make_item(item_code)) is expected
@@ -79,13 +85,16 @@ def test_percentage_discount_calculate_full_discount_equals_line_total():
     assert discount.calculate(item) == Money(1_00, "EUR")
 
 
-@pytest.mark.parametrize("restricted_to,item_code,quantity,expected", [
-    (None, "A", 3, True),
-    (None, "A", 5, True),
-    (None, "A", 2, False),
-    (frozenset({"X"}), "Y", 5, False),
-    (frozenset({"X"}), "X", 3, True),
-])
+@pytest.mark.parametrize(
+    "restricted_to,item_code,quantity,expected",
+    [
+        (None, "A", 3, True),
+        (None, "A", 5, True),
+        (None, "A", 2, False),
+        (frozenset({"X"}), "Y", 5, False),
+        (frozenset({"X"}), "X", 3, True),
+    ],
+)
 def test_volume_discount_applies_to(restricted_to, item_code, quantity, expected):
     discount = VolumeDiscount(restricted_to=restricted_to, amount=Money(5_00, "EUR"), min_quantity=3)
     assert discount.applies_to(make_item(code=item_code, quantity=quantity)) is expected

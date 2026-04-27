@@ -1,7 +1,7 @@
 import pytest
 
-from discount_calculator.money import Money
 from discount_calculator.exceptions import CurrencyMismatchError, InvalidMoneyError
+from discount_calculator.money import Money
 
 
 def test_money_stores_amount_and_currency() -> None:
@@ -16,11 +16,14 @@ def test_money_is_frozen() -> None:
         m.amount = 200  # type: ignore[misc]
 
 
-@pytest.mark.parametrize("amount,currency", [
-    (-1, "EUR"),
-    (1.5, "EUR"),
-    (100, ""),
-])
+@pytest.mark.parametrize(
+    "amount,currency",
+    [
+        (-1, "EUR"),
+        (1.5, "EUR"),
+        (100, ""),
+    ],
+)
 def test_money_raises_on_invalid_construction(amount: object, currency: str) -> None:
     with pytest.raises(InvalidMoneyError):
         Money(amount, currency)  # type: ignore[arg-type]

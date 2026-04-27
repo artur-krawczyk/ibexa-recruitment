@@ -1,8 +1,8 @@
 import pytest
 
-from discount_calculator.percentage import Percentage
-from discount_calculator.money import Money
 from discount_calculator.exceptions import InvalidPercentageError
+from discount_calculator.money import Money
+from discount_calculator.percentage import Percentage
 
 
 def test_percentage_stores_basis_points() -> None:

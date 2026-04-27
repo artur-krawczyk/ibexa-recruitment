@@ -14,9 +14,7 @@ class CartItem:
 
     def __post_init__(self) -> None:
         if self.quantity <= 0:
-            raise InvalidCartItemError(
-                f"quantity must be positive, got {self.quantity}"
-            )
+            raise InvalidCartItemError(f"quantity must be positive, got {self.quantity}")
 
     def line_total(self) -> Money:
         return self.price * self.quantity

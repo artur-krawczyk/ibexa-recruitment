@@ -1,8 +1,8 @@
 import pytest
 
 from discount_calculator.cart_item import CartItem
-from discount_calculator.money import Money
 from discount_calculator.exceptions import InvalidCartItemError
+from discount_calculator.money import Money
 
 
 def test_cart_item_stores_code_price_quantity() -> None:
