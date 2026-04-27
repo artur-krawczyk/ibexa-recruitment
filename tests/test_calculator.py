@@ -56,20 +56,20 @@ def test_multiple_items_no_discounts_returns_sum_of_line_totals():
 
 
 def test_single_item_discount_reduces_total():
-    discount = FixedDiscount(product_codes=None, amount_per_unit=Money(2_00, "EUR"))
+    discount = FixedDiscount(restricted_to=None, amount_per_unit=Money(2_00, "EUR"))
     calc = make_calculator(discounts=[discount])
     # line_total = 10_00, discount = 2_00 → 8_00
     assert calc.calculate_total([make_item(amount=10_00, quantity=1)]) == Money(8_00, "EUR")
 
 
 def test_discount_not_applicable_to_item_leaves_total_unchanged():
-    discount = FixedDiscount(product_codes=frozenset({"Z"}), amount_per_unit=Money(5_00, "EUR"))
+    discount = FixedDiscount(restricted_to=frozenset({"Z"}), amount_per_unit=Money(5_00, "EUR"))
     calc = make_calculator(discounts=[discount])
     assert calc.calculate_total([make_item(code="A", amount=10_00)]) == Money(10_00, "EUR")
 
 
 def test_discount_applied_per_line_independently():
-    discount = FixedDiscount(product_codes=frozenset({"A"}), amount_per_unit=Money(1_00, "EUR"))
+    discount = FixedDiscount(restricted_to=frozenset({"A"}), amount_per_unit=Money(1_00, "EUR"))
     calc = make_calculator(discounts=[discount])
     items = [
         make_item(code="A", amount=5_00, quantity=2),   # line 10_00 − 2_00 = 8_00
@@ -79,8 +79,8 @@ def test_discount_applied_per_line_independently():
 
 
 def test_multiple_items_each_discounted():
-    discount_a = FixedDiscount(product_codes=frozenset({"A"}), amount_per_unit=Money(1_00, "EUR"))
-    discount_b = PercentageDiscount(product_codes=frozenset({"B"}), percentage=Percentage(50_00))
+    discount_a = FixedDiscount(restricted_to=frozenset({"A"}), amount_per_unit=Money(1_00, "EUR"))
+    discount_b = PercentageDiscount(restricted_to=frozenset({"B"}), percentage=Percentage(50_00))
     calc = make_calculator(discounts=[discount_a, discount_b])
     items = [
         make_item(code="A", amount=10_00, quantity=1),  # 10_00 − 1_00 = 9_00
@@ -90,15 +90,15 @@ def test_multiple_items_each_discounted():
 
 
 def test_best_discount_selected_per_line():
-    small = FixedDiscount(product_codes=None, amount_per_unit=Money(1_00, "EUR"))
-    large = PercentageDiscount(product_codes=None, percentage=Percentage(30_00))
+    small = FixedDiscount(restricted_to=None, amount_per_unit=Money(1_00, "EUR"))
+    large = PercentageDiscount(restricted_to=None, percentage=Percentage(30_00))
     calc = make_calculator(discounts=[small, large])
     # line_total = 10_00; small saves 1_00, large saves 3_00 → best = large
     assert calc.calculate_total([make_item(amount=10_00)]) == Money(7_00, "EUR")
 
 
 def test_discount_capped_at_line_total_does_not_go_negative():
-    discount = FixedDiscount(product_codes=None, amount_per_unit=Money(50_00, "EUR"))
+    discount = FixedDiscount(restricted_to=None, amount_per_unit=Money(50_00, "EUR"))
     calc = make_calculator(discounts=[discount])
     # line_total = 5_00, discount raw = 50_00 → capped to 5_00 → total = 0
     assert calc.calculate_total([make_item(amount=5_00, quantity=1)]) == Money(0, "EUR")
@@ -112,8 +112,8 @@ class _FirstApplicablePolicy(DiscountPolicy):
 
 
 def test_custom_policy_injected_and_used():
-    small = FixedDiscount(product_codes=None, amount_per_unit=Money(1_00, "EUR"))  # first
-    large = PercentageDiscount(product_codes=None, percentage=Percentage(40_00))   # second
+    small = FixedDiscount(restricted_to=None, amount_per_unit=Money(1_00, "EUR"))  # first
+    large = PercentageDiscount(restricted_to=None, percentage=Percentage(40_00))   # second
     calc = DiscountCalculator(discounts=[small, large], policy=_FirstApplicablePolicy())
     # _FirstApplicablePolicy picks small (saves 1_00), ignoring large (saves 4_00)
     # line_total = 10_00 − 1_00 = 9_00

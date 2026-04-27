@@ -10,10 +10,10 @@ from discount_calculator.percentage import Percentage
 
 
 class Discount(ABC):
-    product_codes: frozenset[str] | None
+    restricted_to: frozenset[str] | None
 
     def applies_to(self, item: CartItem) -> bool:
-        return self.product_codes is None or item.code in self.product_codes
+        return self.restricted_to is None or item.code in self.restricted_to
 
     @abstractmethod
     def calculate(self, item: CartItem) -> Money: ...
@@ -21,7 +21,7 @@ class Discount(ABC):
 
 @dataclass(frozen=True)
 class FixedDiscount(Discount):
-    product_codes: frozenset[str] | None
+    restricted_to: frozenset[str] | None
     amount_per_unit: Money
 
     def calculate(self, item: CartItem) -> Money:
@@ -36,7 +36,7 @@ class FixedDiscount(Discount):
 
 @dataclass(frozen=True)
 class PercentageDiscount(Discount):
-    product_codes: frozenset[str] | None
+    restricted_to: frozenset[str] | None
     percentage: Percentage
 
     def calculate(self, item: CartItem) -> Money:
@@ -45,7 +45,7 @@ class PercentageDiscount(Discount):
 
 @dataclass(frozen=True)
 class VolumeDiscount(Discount):
-    product_codes: frozenset[str] | None
+    restricted_to: frozenset[str] | None
     amount: Money
     min_quantity: int
 

@@ -24,38 +24,38 @@ def test_returns_zero_when_no_discounts():
 def test_returns_zero_when_no_discount_applies():
     policy = BestDiscountPolicy()
     item = make_item(code="A")
-    discount = FixedDiscount(product_codes=frozenset({"B"}), amount_per_unit=Money(1_00, "EUR"))
+    discount = FixedDiscount(restricted_to=frozenset({"B"}), amount_per_unit=Money(1_00, "EUR"))
     assert policy.calculate([discount], item) == Money(0, "EUR")
 
 
 def test_returns_saving_of_single_applicable_discount():
     policy = BestDiscountPolicy()
     item = make_item(amount=10_00, quantity=1)
-    discount = FixedDiscount(product_codes=None, amount_per_unit=Money(2_00, "EUR"))
+    discount = FixedDiscount(restricted_to=None, amount_per_unit=Money(2_00, "EUR"))
     assert policy.calculate([discount], item) == Money(2_00, "EUR")
 
 
 def test_picks_larger_reduction_over_smaller():
     policy = BestDiscountPolicy()
     item = make_item(amount=10_00, quantity=1)  # line_total = 10_00
-    small = FixedDiscount(product_codes=None, amount_per_unit=Money(1_00, "EUR"))   # saves 1_00
-    large = PercentageDiscount(product_codes=None, percentage=Percentage(30_00))    # saves 3_00
+    small = FixedDiscount(restricted_to=None, amount_per_unit=Money(1_00, "EUR"))   # saves 1_00
+    large = PercentageDiscount(restricted_to=None, percentage=Percentage(30_00))    # saves 3_00
     assert policy.calculate([small, large], item) == Money(3_00, "EUR")
 
 
 def test_picks_larger_reduction_regardless_of_order():
     policy = BestDiscountPolicy()
     item = make_item(amount=10_00, quantity=1)
-    large = PercentageDiscount(product_codes=None, percentage=Percentage(30_00))    # saves 3_00
-    small = FixedDiscount(product_codes=None, amount_per_unit=Money(1_00, "EUR"))   # saves 1_00
+    large = PercentageDiscount(restricted_to=None, percentage=Percentage(30_00))    # saves 3_00
+    small = FixedDiscount(restricted_to=None, amount_per_unit=Money(1_00, "EUR"))   # saves 1_00
     assert policy.calculate([large, small], item) == Money(3_00, "EUR")
 
 
 def test_tie_broken_by_insertion_order():
     policy = BestDiscountPolicy()
     item = make_item(amount=10_00, quantity=1)  # line_total = 10_00
-    first = FixedDiscount(product_codes=None, amount_per_unit=Money(5_00, "EUR"))
-    second = PercentageDiscount(product_codes=None, percentage=Percentage(50_00))   # also 5_00
+    first = FixedDiscount(restricted_to=None, amount_per_unit=Money(5_00, "EUR"))
+    second = PercentageDiscount(restricted_to=None, percentage=Percentage(50_00))   # also 5_00
     # both save 5_00; first in insertion order is returned
     assert policy.calculate([first, second], item) == Money(5_00, "EUR")
 
@@ -63,22 +63,22 @@ def test_tie_broken_by_insertion_order():
 def test_skips_non_applicable_returns_saving_of_applicable():
     policy = BestDiscountPolicy()
     item = make_item(code="A", amount=10_00, quantity=1)
-    non_applicable = FixedDiscount(product_codes=frozenset({"B"}), amount_per_unit=Money(9_00, "EUR"))
-    applicable = FixedDiscount(product_codes=frozenset({"A"}), amount_per_unit=Money(2_00, "EUR"))
+    non_applicable = FixedDiscount(restricted_to=frozenset({"B"}), amount_per_unit=Money(9_00, "EUR"))
+    applicable = FixedDiscount(restricted_to=frozenset({"A"}), amount_per_unit=Money(2_00, "EUR"))
     assert policy.calculate([non_applicable, applicable], item) == Money(2_00, "EUR")
 
 
 def test_returns_zero_below_volume_min_quantity():
     policy = BestDiscountPolicy()
     item = make_item(amount=10_00, quantity=2)
-    volume = VolumeDiscount(product_codes=None, amount=Money(5_00, "EUR"), min_quantity=3)
+    volume = VolumeDiscount(restricted_to=None, amount=Money(5_00, "EUR"), min_quantity=3)
     assert policy.calculate([volume], item) == Money(0, "EUR")
 
 
 def test_returns_saving_at_volume_min_quantity():
     policy = BestDiscountPolicy()
     item = make_item(amount=10_00, quantity=3)
-    volume = VolumeDiscount(product_codes=None, amount=Money(5_00, "EUR"), min_quantity=3)
+    volume = VolumeDiscount(restricted_to=None, amount=Money(5_00, "EUR"), min_quantity=3)
     assert policy.calculate([volume], item) == Money(5_00, "EUR")
 
 
