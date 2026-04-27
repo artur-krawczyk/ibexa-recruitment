@@ -27,3 +27,8 @@ def test_cart_item_raises_on_non_positive_quantity(quantity: int) -> None:
 def test_line_total_is_price_times_quantity() -> None:
     item = CartItem("SKU-1", Money(150, "EUR"), 4)
     assert item.line_total() == Money(600, "EUR")
+
+
+def test_cart_item_raises_on_empty_code() -> None:
+    with pytest.raises(InvalidCartItemError):
+        CartItem("", Money(100, "EUR"), 1)

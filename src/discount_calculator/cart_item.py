@@ -13,6 +13,8 @@ class CartItem:
     quantity: int
 
     def __post_init__(self) -> None:
+        if not self.code:
+            raise InvalidCartItemError("code must be a non-empty string")
         if self.quantity <= 0:
             raise InvalidCartItemError(f"quantity must be positive, got {self.quantity}")
 

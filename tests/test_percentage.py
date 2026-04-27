@@ -22,6 +22,12 @@ def test_percentage_raises_on_invalid_basis_points(bps: int) -> None:
         Percentage(bps)
 
 
+@pytest.mark.parametrize("bps", [10.0, 0.5, True, False])
+def test_percentage_raises_on_non_int_basis_points(bps: object) -> None:
+    with pytest.raises(InvalidPercentageError):
+        Percentage(bps)  # type: ignore[arg-type]
+
+
 @pytest.mark.parametrize("bps", [0, 1, 5000, 9999, 10000])
 def test_percentage_boundary_values_are_valid(bps: int) -> None:
     assert Percentage(bps).basis_points == bps

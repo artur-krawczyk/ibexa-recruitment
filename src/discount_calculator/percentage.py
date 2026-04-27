@@ -12,6 +12,8 @@ class Percentage:
     basis_points: int
 
     def __post_init__(self) -> None:
+        if isinstance(self.basis_points, bool) or not isinstance(self.basis_points, int):
+            raise InvalidPercentageError(f"basis_points must be an int, got {type(self.basis_points).__name__}")
         if not (0 <= self.basis_points <= 10000):
             raise InvalidPercentageError(f"basis_points must be in [0, 10000], got {self.basis_points}")
 
