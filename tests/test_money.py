@@ -97,3 +97,32 @@ def test_multiplication_returns_new_instance() -> None:
 def test_multiplication_by_negative_raises(n: int) -> None:
     with pytest.raises(InvalidMoneyError):
         Money(100, "EUR") * n
+
+
+@pytest.mark.parametrize("amount", [True, False])
+def test_money_raises_on_bool_amount(amount: bool) -> None:
+    with pytest.raises(InvalidMoneyError):
+        Money(amount, "EUR")  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("n", [True, False])
+def test_multiplication_by_bool_raises(n: bool) -> None:
+    with pytest.raises(InvalidMoneyError):
+        Money(100, "EUR") * n  # type: ignore[arg-type]
+
+
+def test_less_than_returns_true_when_amount_is_smaller() -> None:
+    assert Money(50, "EUR") < Money(100, "EUR")
+
+
+def test_less_than_returns_false_when_amounts_are_equal() -> None:
+    assert not (Money(100, "EUR") < Money(100, "EUR"))
+
+
+def test_less_than_returns_false_when_amount_is_greater() -> None:
+    assert not (Money(200, "EUR") < Money(100, "EUR"))
+
+
+def test_less_than_different_currency_raises() -> None:
+    with pytest.raises(CurrencyMismatchError):
+        Money(50, "EUR") < Money(100, "USD")  # type: ignore[operator]  # noqa: B015

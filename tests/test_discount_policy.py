@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 import pytest
 
 from discount_calculator.cart_item import CartItem
@@ -7,35 +9,26 @@ from discount_calculator.money import Money
 from discount_calculator.percentage import Percentage
 
 
-def make_item(
-    code: str = "A",
-    amount: int = 10_00,
-    currency: str = "EUR",
-    quantity: int = 1,
-) -> CartItem:
-    return CartItem(code=code, price=Money(amount, currency), quantity=quantity)
-
-
-def test_returns_zero_when_no_discounts():
+def test_returns_zero_when_no_discounts(make_item: Callable[..., CartItem]) -> None:
     policy = BestDiscountPolicy()
     assert policy.calculate([], make_item()) == Money(0, "EUR")
 
 
-def test_returns_zero_when_no_discount_applies():
+def test_returns_zero_when_no_discount_applies(make_item: Callable[..., CartItem]) -> None:
     policy = BestDiscountPolicy()
     item = make_item(code="A")
     discount = FixedDiscount(restricted_to=frozenset({"B"}), amount_per_unit=Money(1_00, "EUR"))
     assert policy.calculate([discount], item) == Money(0, "EUR")
 
 
-def test_returns_saving_of_single_applicable_discount():
+def test_returns_saving_of_single_applicable_discount(make_item: Callable[..., CartItem]) -> None:
     policy = BestDiscountPolicy()
     item = make_item(amount=10_00, quantity=1)
     discount = FixedDiscount(restricted_to=None, amount_per_unit=Money(2_00, "EUR"))
     assert policy.calculate([discount], item) == Money(2_00, "EUR")
 
 
-def test_picks_larger_reduction_over_smaller():
+def test_picks_larger_reduction_over_smaller(make_item: Callable[..., CartItem]) -> None:
     policy = BestDiscountPolicy()
     item = make_item(amount=10_00, quantity=1)  # line_total = 10_00
     small = FixedDiscount(restricted_to=None, amount_per_unit=Money(1_00, "EUR"))  # saves 1_00
@@ -43,7 +36,7 @@ def test_picks_larger_reduction_over_smaller():
     assert policy.calculate([small, large], item) == Money(3_00, "EUR")
 
 
-def test_picks_larger_reduction_regardless_of_order():
+def test_picks_larger_reduction_regardless_of_order(make_item: Callable[..., CartItem]) -> None:
     policy = BestDiscountPolicy()
     item = make_item(amount=10_00, quantity=1)
     large = PercentageDiscount(restricted_to=None, percentage=Percentage(30_00))  # saves 3_00
@@ -51,7 +44,7 @@ def test_picks_larger_reduction_regardless_of_order():
     assert policy.calculate([large, small], item) == Money(3_00, "EUR")
 
 
-def test_tie_broken_by_insertion_order():
+def test_tie_broken_by_insertion_order(make_item: Callable[..., CartItem]) -> None:
     policy = BestDiscountPolicy()
     item = make_item(amount=10_00, quantity=1)  # line_total = 10_00
     first = FixedDiscount(restricted_to=None, amount_per_unit=Money(5_00, "EUR"))
@@ -60,7 +53,7 @@ def test_tie_broken_by_insertion_order():
     assert policy.calculate([first, second], item) == Money(5_00, "EUR")
 
 
-def test_skips_non_applicable_returns_saving_of_applicable():
+def test_skips_non_applicable_returns_saving_of_applicable(make_item: Callable[..., CartItem]) -> None:
     policy = BestDiscountPolicy()
     item = make_item(code="A", amount=10_00, quantity=1)
     non_applicable = FixedDiscount(restricted_to=frozenset({"B"}), amount_per_unit=Money(9_00, "EUR"))
@@ -68,26 +61,19 @@ def test_skips_non_applicable_returns_saving_of_applicable():
     assert policy.calculate([non_applicable, applicable], item) == Money(2_00, "EUR")
 
 
-def test_returns_zero_below_volume_min_quantity():
+def test_returns_zero_below_volume_min_quantity(make_item: Callable[..., CartItem]) -> None:
     policy = BestDiscountPolicy()
     item = make_item(amount=10_00, quantity=2)
     volume = VolumeDiscount(restricted_to=None, amount=Money(5_00, "EUR"), min_quantity=3)
     assert policy.calculate([volume], item) == Money(0, "EUR")
 
 
-def test_returns_saving_at_volume_min_quantity():
+def test_returns_saving_at_volume_min_quantity(make_item: Callable[..., CartItem]) -> None:
     policy = BestDiscountPolicy()
     item = make_item(amount=10_00, quantity=3)
     volume = VolumeDiscount(restricted_to=None, amount=Money(5_00, "EUR"), min_quantity=3)
     assert policy.calculate([volume], item) == Money(5_00, "EUR")
 
-
-# ---------------------------------------------------------------------------
-# Parametrized multi-discount scenarios
-#
-# Each tuple: (item, discounts_list, expected_saving).
-# Savings are annotated so the winner is easy to verify by reading.
-# ---------------------------------------------------------------------------
 
 _SCENARIOS = [
     pytest.param(

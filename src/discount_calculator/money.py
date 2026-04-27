@@ -11,7 +11,7 @@ class Money:
     currency: str
 
     def __post_init__(self) -> None:
-        if not isinstance(self.amount, int):
+        if isinstance(self.amount, bool) or not isinstance(self.amount, int):
             raise InvalidMoneyError(f"amount must be an int, got {type(self.amount).__name__}")
         if self.amount < 0:
             raise InvalidMoneyError(f"amount must be non-negative, got {self.amount}")
@@ -27,9 +27,13 @@ class Money:
         return Money(max(self.amount - other.amount, 0), self.currency)
 
     def __mul__(self, n: int) -> Money:
-        if not isinstance(n, int) or n < 0:
+        if isinstance(n, bool) or not isinstance(n, int) or n < 0:
             raise InvalidMoneyError(f"multiplier must be a non-negative int, got {n!r}")
         return Money(self.amount * n, self.currency)
+
+    def __lt__(self, other: Money) -> bool:
+        self._assert_same_currency(other)
+        return self.amount < other.amount
 
     def _assert_same_currency(self, other: Money) -> None:
         if self.currency != other.currency:

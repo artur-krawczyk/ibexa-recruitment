@@ -1,7 +1,7 @@
 from discount_calculator.calculator import DiscountCalculator
 from discount_calculator.cart_item import CartItem
-from discount_calculator.discount_policy import BestDiscountPolicy
-from discount_calculator.discounts import FixedDiscount, PercentageDiscount, VolumeDiscount
+from discount_calculator.discount_policy import BestDiscountPolicy, DiscountPolicy
+from discount_calculator.discounts import Discount, FixedDiscount, PercentageDiscount, VolumeDiscount
 from discount_calculator.exceptions import (
     CurrencyMismatchError,
     EmptyCartError,
@@ -16,7 +16,9 @@ __all__ = [
     "BestDiscountPolicy",
     "CartItem",
     "CurrencyMismatchError",
+    "Discount",
     "DiscountCalculator",
+    "DiscountPolicy",
     "EmptyCartError",
     "FixedDiscount",
     "InvalidCartItemError",
