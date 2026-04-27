@@ -46,10 +46,9 @@ def test_picks_larger_reduction_regardless_of_order(make_item: Callable[..., Car
 
 def test_tie_broken_by_insertion_order(make_item: Callable[..., CartItem]) -> None:
     policy = BestDiscountPolicy()
-    item = make_item(amount=10_00, quantity=1)  # line_total = 10_00
+    item = make_item(amount=10_00, quantity=1)
     first = FixedDiscount(restricted_to=None, amount_per_unit=Money(5_00, "EUR"))
-    second = PercentageDiscount(restricted_to=None, percentage=Percentage(50_00))  # also 5_00
-    # both save 5_00; first in insertion order is returned
+    second = PercentageDiscount(restricted_to=None, percentage=Percentage(50_00))
     assert policy.calculate([first, second], item) == Money(5_00, "EUR")
 
 
@@ -132,15 +131,15 @@ _SCENARIOS = [
         id="volume_beats_percentage_fixed_inapplicable",
     ),
     pytest.param(
-        # qty=1, price=10_00 EUR  →  line_total=10_00; three-way tie
+        # qty=1, price=10_00 EUR  →  line_total=10_00; three-way tie at 5_00
         CartItem(code="X", price=Money(10_00, "EUR"), quantity=1),
         [
-            FixedDiscount(None, Money(5_00, "EUR")),  # saves 5_00  ← first in
-            PercentageDiscount(None, Percentage(50_00)),  # saves 5_00  tied
-            VolumeDiscount(None, Money(5_00, "EUR"), min_quantity=1),  # saves 5_00  tied
+            FixedDiscount(None, Money(5_00, "EUR")),
+            PercentageDiscount(None, Percentage(50_00)),
+            VolumeDiscount(None, Money(5_00, "EUR"), min_quantity=1),
         ],
         Money(5_00, "EUR"),
-        id="three_way_tie_insertion_order_wins",
+        id="three_way_tie_returns_correct_saving",
     ),
 ]
 

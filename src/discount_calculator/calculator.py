@@ -17,5 +17,5 @@ class DiscountCalculator:
         total = Money(0, items[0].price.currency)
         for item in items:
             saving = self._policy.calculate(self._discounts, item)
-            total = total + item.line_total() - saving
+            total = total + (item.line_total() - saving)
         return total

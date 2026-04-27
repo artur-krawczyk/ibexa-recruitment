@@ -9,7 +9,7 @@ from discount_calculator.money import Money
 from discount_calculator.percentage import Percentage
 
 
-def test_discount_cannot_be_instantiated_directly():
+def test_discount_cannot_be_instantiated_directly() -> None:
     with pytest.raises(TypeError):
         Discount(restricted_to=None)  # type: ignore[abstract]
 
